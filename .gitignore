@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.local
+dist/
+.next/
+*.log
+.DS_Store
+coverage/
+.vscode/
+.idea/
+*.swp
+*.swo
+.cache/
+postgres_data/

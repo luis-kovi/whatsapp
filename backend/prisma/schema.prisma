@@ -1,0 +1,331 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  SUPERVISOR
+  AGENT
+}
+
+enum UserStatus {
+  ONLINE
+  OFFLINE
+  AWAY
+}
+
+enum TicketStatus {
+  PENDING
+  OPEN
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  RECEIVED
+  READ
+  ERROR
+}
+
+enum DistributionMode {
+  ROUND_ROBIN
+  LEAST_ACTIVE
+  LAST_AGENT
+  RANDOM
+}
+
+model User {
+  id                String       @id @default(uuid())
+  name              String
+  email             String       @unique
+  password          String
+  role              UserRole     @default(AGENT)
+  status            UserStatus   @default(OFFLINE)
+  avatar            String?
+  maxTickets        Int          @default(5)
+  workSchedule      Json?
+  isActive          Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  tickets           Ticket[]
+  messages          Message[]
+  queueUsers        QueueUser[]
+  notes             Note[]
+  activities        Activity[]
+  transfersFrom     Transfer[]   @relation("TransferFrom")
+  transfersTo       Transfer[]   @relation("TransferTo")
+  
+  @@map("users")
+}
+
+model WhatsAppConnection {
+  id                String       @id @default(uuid())
+  name              String
+  phoneNumber       String?
+  status            String       @default("DISCONNECTED")
+  qrCode            String?
+  isDefault         Boolean      @default(false)
+  retries           Int          @default(0)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  tickets           Ticket[]
+  messages          Message[]
+  
+  @@map("whatsapp_connections")
+}
+
+model Contact {
+  id                String       @id @default(uuid())
+  name              String
+  phoneNumber       String       @unique
+  email             String?
+  avatar            String?
+  customFields      Json?
+  isBlocked         Boolean      @default(false)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  tickets           Ticket[]
+  contactTags       ContactTag[]
+  notes             Note[]
+  
+  @@map("contacts")
+}
+
+model Queue {
+  id                String            @id @default(uuid())
+  name              String
+  color             String
+  description       String?
+  greetingMessage   String?
+  outOfHoursMessage String?
+  workSchedule      Json?
+  priority          Int               @default(0)
+  distributionMode  DistributionMode  @default(ROUND_ROBIN)
+  isActive          Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  queueUsers        QueueUser[]
+  tickets           Ticket[]
+  quickReplies      QuickReply[]
+  
+  @@map("queues")
+}
+
+model QueueUser {
+  id                String       @id @default(uuid())
+  userId            String
+  queueId           String
+  createdAt         DateTime     @default(now())
+  
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  queue             Queue        @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, queueId])
+  @@map("queue_users")
+}
+
+model Ticket {
+  id                String          @id @default(uuid())
+  contactId         String
+  userId            String?
+  queueId           String?
+  connectionId      String
+  status            TicketStatus    @default(PENDING)
+  priority          TicketPriority  @default(MEDIUM)
+  unreadMessages    Int             @default(0)
+  lastMessageAt     DateTime        @default(now())
+  closedAt          DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  contact           Contact         @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user              User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  queue             Queue?          @relation(fields: [queueId], references: [id], onDelete: SetNull)
+  connection        WhatsAppConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  
+  messages          Message[]
+  ticketTags        TicketTag[]
+  notes             Note[]
+  transfers         Transfer[]
+  ratings           Rating[]
+  
+  @@index([status, queueId])
+  @@index([contactId])
+  @@map("tickets")
+}
+
+model Message {
+  id                String          @id @default(uuid())
+  ticketId          String
+  userId            String?
+  connectionId      String
+  body              String          @db.Text
+  mediaUrl          String?
+  mediaType         String?
+  isPrivate         Boolean         @default(false)
+  fromMe            Boolean         @default(false)
+  status            MessageStatus   @default(PENDING)
+  quotedMessageId   String?
+  timestamp         DateTime        @default(now())
+  createdAt         DateTime        @default(now())
+  
+  ticket            Ticket          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user              User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  connection        WhatsAppConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  quotedMessage     Message?        @relation("MessageQuote", fields: [quotedMessageId], references: [id])
+  quotes            Message[]       @relation("MessageQuote")
+  
+  @@index([ticketId])
+  @@map("messages")
+}
+
+model Tag {
+  id                String       @id @default(uuid())
+  name              String       @unique
+  color             String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  ticketTags        TicketTag[]
+  contactTags       ContactTag[]
+  
+  @@map("tags")
+}
+
+model TicketTag {
+  id                String       @id @default(uuid())
+  ticketId          String
+  tagId             String
+  createdAt         DateTime     @default(now())
+  
+  ticket            Ticket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  tag               Tag          @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@unique([ticketId, tagId])
+  @@map("ticket_tags")
+}
+
+model ContactTag {
+  id                String       @id @default(uuid())
+  contactId         String
+  tagId             String
+  createdAt         DateTime     @default(now())
+  
+  contact           Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  tag               Tag          @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@unique([contactId, tagId])
+  @@map("contact_tags")
+}
+
+model QuickReply {
+  id                String       @id @default(uuid())
+  shortcut          String
+  message           String       @db.Text
+  mediaUrl          String?
+  queueId           String?
+  userId            String?
+  isGlobal          Boolean      @default(true)
+  usageCount        Int          @default(0)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  queue             Queue?       @relation(fields: [queueId], references: [id], onDelete: SetNull)
+  
+  @@map("quick_replies")
+}
+
+model Note {
+  id                String       @id @default(uuid())
+  ticketId          String?
+  contactId         String?
+  userId            String
+  content           String       @db.Text
+  createdAt         DateTime     @default(now())
+  
+  ticket            Ticket?      @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  contact           Contact?     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("notes")
+}
+
+model Transfer {
+  id                String       @id @default(uuid())
+  ticketId          String
+  fromUserId        String?
+  toUserId          String?
+  reason            String?
+  createdAt         DateTime     @default(now())
+  
+  ticket            Ticket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  fromUser          User?        @relation("TransferFrom", fields: [fromUserId], references: [id], onDelete: SetNull)
+  toUser            User?        @relation("TransferTo", fields: [toUserId], references: [id], onDelete: SetNull)
+  
+  @@map("transfers")
+}
+
+model Rating {
+  id                String       @id @default(uuid())
+  ticketId          String
+  score             Int
+  comment           String?
+  createdAt         DateTime     @default(now())
+  
+  ticket            Ticket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  
+  @@map("ratings")
+}
+
+model Activity {
+  id                String       @id @default(uuid())
+  userId            String
+  action            String
+  description       String
+  metadata          Json?
+  createdAt         DateTime     @default(now())
+  
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@map("activities")
+}
+
+model Setting {
+  id                String       @id @default(uuid())
+  key               String       @unique
+  value             String       @db.Text
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  @@map("settings")
+}
+
+model Chatbot {
+  id                String       @id @default(uuid())
+  name              String
+  isActive          Boolean      @default(true)
+  flowData          Json
+  workSchedule      Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  @@map("chatbots")
+}
