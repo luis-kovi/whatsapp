@@ -1,4 +1,5 @@
-import makeWASocket, { DisconnectReason, useMultiFileAuthState, WASocket } from '@whiskeysockets/baileys';
+import makeWASocket from '@whiskeysockets/baileys';
+import type { DisconnectReason, WASocket } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import { prisma } from '../utils/prisma';
 import { emitToAll } from './socket.service';
@@ -20,6 +21,7 @@ export const initWhatsAppSession = async (connectionId: string) => {
     if (!connection) throw new Error('Connection not found');
 
     const authPath = path.join(__dirname, '../../.wwebjs_auth', connectionId);
+    const { useMultiFileAuthState } = await import('@whiskeysockets/baileys');
     const { state, saveCreds } = await useMultiFileAuthState(authPath);
 
     const socket = makeWASocket({
