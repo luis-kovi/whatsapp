@@ -140,3 +140,21 @@ export const transferTicket = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Erro ao transferir ticket' });
   }
 };
+
+export const getTicketMessages = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const messages = await prisma.message.findMany({
+      where: { ticketId: id },
+      include: {
+        user: { select: { name: true } }
+      },
+      orderBy: { timestamp: 'asc' }
+    });
+
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar mensagens' });
+  }
+};
