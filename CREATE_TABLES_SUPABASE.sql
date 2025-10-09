@@ -227,6 +227,13 @@ ALTER TABLE "activities" ADD FOREIGN KEY ("userId") REFERENCES "users"("id") ON 
 INSERT INTO "users" (id, name, email, password, role, "maxTickets", "isActive")
 VALUES (
   gen_random_uuid()::text,
+  'Admin',
+  'admin@whatsapp.com',
+  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+  'ADMIN',
+  999,
+  true
+);text,
   'Administrador',
   'admin@whatsapp.com',
   '$2a$10$rOiZ8qN8K5vY5Z5Z5Z5Z5.Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z',

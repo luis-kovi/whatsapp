@@ -14,6 +14,7 @@ import quickReplyRoutes from './routes/quickReply.routes';
 import whatsappRoutes from './routes/whatsapp.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import settingRoutes from './routes/setting.routes';
+import debugRoutes from './routes/debug.routes';
 import { initializeSocket } from './services/socket.service';
 import { errorHandler } from './middlewares/error.middleware';
 
@@ -47,6 +48,7 @@ app.use('/api/quick-replies', quickReplyRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingRoutes);
+app.use('/api/debug', debugRoutes);
 
 app.use(errorHandler);
 
