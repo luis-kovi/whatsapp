@@ -33,6 +33,24 @@ export default function TicketsPage() {
 
   useEffect(() => {
     loadTickets();
+    
+    const socket = require('@/lib/socket').getSocket();
+    if (socket) {
+      socket.on('ticket:new', loadTickets);
+      socket.on('ticket:update', loadTickets);
+      socket.on('message:new', (data: any) => {
+        if (selectedTicket && data.ticketId === selectedTicket.id) {
+          loadMessages(selectedTicket.id);
+        }
+        loadTickets();
+      });
+      
+      return () => {
+        socket.off('ticket:new');
+        socket.off('ticket:update');
+        socket.off('message:new');
+      };
+    }
   }, [filter]);
 
   useEffect(() => {

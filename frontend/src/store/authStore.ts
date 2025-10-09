@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '@/lib/api';
+import { initSocket, disconnectSocket } from '@/lib/socket';
 
 interface User {
   id: string;
@@ -24,10 +25,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
     const { data } = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', data.token);
     set({ user: data.user, token: data.token });
+    initSocket(data.token);
   },
   logout: () => {
     localStorage.removeItem('token');
+    disconnectSocket();
     set({ user: null, token: null });
   },
   setUser: (user) => set({ user }),
 }));
+
