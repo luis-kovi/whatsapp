@@ -37,6 +37,8 @@ app.use(express.urlencoded({ extended: true }));
 
 initializeSocket(io);
 
+app.get('/', (req, res) => res.json({ status: 'ok', message: 'WhatsApp Manager API' }));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/queues', queueRoutes);
