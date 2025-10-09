@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, UserCheck, UserX } from 'lucide-react';
+import { Plus, Edit, Trash2, UserCheck, UserX, X, Shield, Users as UsersIcon } from 'lucide-react';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 
@@ -57,60 +57,71 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Sidebar />
       <div className="flex-1 p-6 overflow-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Usuários</h1>
-          <button onClick={() => setShowModal(true)} className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent flex items-center gap-3">
+              <UsersIcon className="w-8 h-8 text-green-500" />
+              Usuários
+            </h1>
+            <p className="text-gray-400 mt-1">Gerencie os usuários do sistema</p>
+          </div>
+          <button onClick={() => setShowModal(true)} className="btn-whatsapp flex items-center gap-2">
             <Plus size={20} /> Novo Usuário
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="card-premium overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-800/50 border-b border-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Perfil</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Max Tickets</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Nome</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Email</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Perfil</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Max Tickets</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-800/30">
               {users.map(user => (
-                <tr key={user.id}>
+                <tr key={user.id} className="hover:bg-gray-800/30 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {user.isActive ? <UserCheck className="w-5 h-5 text-green-500 mr-2" /> : <UserX className="w-5 h-5 text-red-500 mr-2" />}
-                      {user.name}
+                    <div className="flex items-center gap-3">
+                      {user.isActive ? <UserCheck className="w-5 h-5 text-green-400" /> : <UserX className="w-5 h-5 text-red-400" />}
+                      <span className="text-gray-200 font-medium">{user.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{user.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' :
-                      user.role === 'SUPERVISOR' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                      user.role === 'ADMIN' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
+                      user.role === 'SUPERVISOR' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                      'bg-gray-500/20 text-gray-400 border border-gray-500/30'
                     }`}>{user.role}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      user.status === 'ONLINE' ? 'bg-green-100 text-green-800' :
-                      user.status === 'AWAY' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>{user.status}</span>
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full flex items-center gap-1 w-fit ${
+                      user.status === 'ONLINE' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                      user.status === 'AWAY' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                      'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                    }`}>
+                      <div className={`w-2 h-2 rounded-full ${user.status === 'ONLINE' ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`} />
+                      {user.status}
+                    </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.maxTickets}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.maxTickets}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button onClick={() => openEditModal(user)} className="text-blue-600 hover:text-blue-900 mr-3">
-                      <Edit size={18} />
-                    </button>
-                    <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">
-                      <Trash2 size={18} />
-                    </button>
+                    <div className="flex gap-2">
+                      <button onClick={() => openEditModal(user)} className="p-2 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-colors">
+                        <Edit size={18} />
+                      </button>
+                      <button onClick={() => handleDelete(user.id)} className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -119,37 +130,45 @@ export default function UsersPage() {
         </div>
 
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h2 className="text-xl font-bold mb-4">{editingUser ? 'Editar Usuário' : 'Novo Usuário'}</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Nome</label>
-                  <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border rounded px-3 py-2" required />
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="card-premium p-6 w-full max-w-md">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                  <Shield className="w-6 h-6 text-green-400" />
+                  {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
+                </h2>
+                <button onClick={() => { setShowModal(false); setEditingUser(null); }} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Nome</label>
+                  <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="input-premium w-full" required />
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full border rounded px-3 py-2" required />
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                  <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="input-premium w-full" required />
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Senha {editingUser && '(deixe em branco para não alterar)'}</label>
-                  <input type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full border rounded px-3 py-2" required={!editingUser} />
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Senha {editingUser && <span className="text-gray-500 text-xs">(deixe em branco para não alterar)</span>}</label>
+                  <input type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="input-premium w-full" required={!editingUser} />
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Perfil</label>
-                  <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value as any})} className="w-full border rounded px-3 py-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Perfil</label>
+                  <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value as any})} className="input-premium w-full">
                     <option value="AGENT">Atendente</option>
                     <option value="SUPERVISOR">Supervisor</option>
                     <option value="ADMIN">Administrador</option>
                   </select>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Máximo de Tickets</label>
-                  <input type="number" value={formData.maxTickets} onChange={e => setFormData({...formData, maxTickets: parseInt(e.target.value)})} className="w-full border rounded px-3 py-2" min="1" required />
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Máximo de Tickets</label>
+                  <input type="number" value={formData.maxTickets} onChange={e => setFormData({...formData, maxTickets: parseInt(e.target.value)})} className="input-premium w-full" min="1" required />
                 </div>
-                <div className="flex gap-2">
-                  <button type="submit" className="flex-1 bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Salvar</button>
-                  <button type="button" onClick={() => { setShowModal(false); setEditingUser(null); }} className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400">Cancelar</button>
+                <div className="flex gap-3 pt-4">
+                  <button type="submit" className="btn-whatsapp flex-1">Salvar</button>
+                  <button type="button" onClick={() => { setShowModal(false); setEditingUser(null); }} className="btn-secondary flex-1">Cancelar</button>
                 </div>
               </form>
             </div>
