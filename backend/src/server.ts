@@ -26,11 +26,8 @@ const io = new Server(httpServer, {
 });
 
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    process.env.FRONTEND_URL || 'https://*.vercel.app'
-  ],
-  credentials: true
+  origin: '*',
+  credentials: false
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
