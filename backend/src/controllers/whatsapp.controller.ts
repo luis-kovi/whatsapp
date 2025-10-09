@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../utils/prisma';
-import { initWhatsAppSession, disconnectWhatsApp, getSession } from '../services/whatsapp-mock.service';
+import { initWhatsAppSession, disconnectWhatsApp, getSession } from '../services/whatsapp-real.service';
 
 export const getConnections = async (req: Request, res: Response) => {
   try {
