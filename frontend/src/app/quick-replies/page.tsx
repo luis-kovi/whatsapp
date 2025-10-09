@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Zap, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Zap, Search, X, Sparkles } from 'lucide-react';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 
@@ -61,65 +61,89 @@ export default function QuickRepliesPage() {
   );
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Sidebar />
       <div className="flex-1 p-6 overflow-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Respostas Rápidas</h1>
-          <button onClick={() => setShowModal(true)} className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent flex items-center gap-3">
+              <Zap className="w-8 h-8 text-yellow-500" />
+              Respostas Rápidas
+            </h1>
+            <p className="text-gray-400 mt-1">Agilize seu atendimento com atalhos</p>
+          </div>
+          <button onClick={() => setShowModal(true)} className="btn-whatsapp flex items-center gap-2">
             <Plus size={20} /> Nova Resposta
           </button>
         </div>
 
-        <div className="mb-4 relative">
-          <Search className="absolute left-3 top-3 text-gray-400" size={18} />
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..." className="w-full pl-10 pr-3 py-2 border rounded-lg" />
+        <div className="mb-6 relative">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar respostas..." className="input-premium w-full pl-12" />
         </div>
 
         <div className="space-y-3">
           {filtered.map(reply => (
-            <div key={reply.id} className="bg-white rounded-lg shadow p-4">
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center gap-2">
-                  <Zap className="text-yellow-500" size={20} />
-                  <span className="font-mono font-bold text-blue-600">/{reply.shortcut}</span>
-                  {reply.isGlobal && <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Global</span>}
-                  <span className="text-xs text-gray-500">{reply.usageCount} usos</span>
+            <div key={reply.id} className="card-premium p-5 hover:scale-[1.02] transition-transform duration-300 group">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-yellow-500/20 rounded-lg border border-yellow-500/30">
+                    <Zap className="text-yellow-400" size={20} />
+                  </div>
+                  <div>
+                    <span className="font-mono font-bold text-green-400 text-lg">/{reply.shortcut}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      {reply.isGlobal && <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30">Global</span>}
+                      <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <Sparkles size={12} />
+                        {reply.usageCount} usos
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => openEdit(reply)} className="text-blue-600 hover:text-blue-900">
+                  <button onClick={() => openEdit(reply)} className="p-2 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-colors">
                     <Edit size={18} />
                   </button>
-                  <button onClick={() => handleDelete(reply.id)} className="text-red-600 hover:text-red-900">
+                  <button onClick={() => handleDelete(reply.id)} className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors">
                     <Trash2 size={18} />
                   </button>
                 </div>
               </div>
-              <p className="text-gray-700 whitespace-pre-wrap">{reply.message}</p>
+              <p className="text-gray-300 whitespace-pre-wrap bg-gray-800/30 p-3 rounded-lg border border-gray-700/50">{reply.message}</p>
             </div>
           ))}
         </div>
 
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-              <h2 className="text-xl font-bold mb-4">{editing ? 'Editar' : 'Nova'} Resposta Rápida</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Atalho (sem /)</label>
-                  <input type="text" value={formData.shortcut} onChange={e => setFormData({...formData, shortcut: e.target.value})} className="w-full border rounded px-3 py-2" placeholder="Ex: saudacao" required />
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="card-premium p-6 w-full max-w-2xl">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                  <Zap className="w-6 h-6 text-yellow-400" />
+                  {editing ? 'Editar' : 'Nova'} Resposta Rápida
+                </h2>
+                <button onClick={() => { setShowModal(false); setEditing(null); }} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Atalho (sem /)</label>
+                  <input type="text" value={formData.shortcut} onChange={e => setFormData({...formData, shortcut: e.target.value})} className="input-premium w-full" placeholder="Ex: saudacao" required />
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Mensagem</label>
-                  <textarea value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} className="w-full border rounded px-3 py-2" rows={6} placeholder="Use {nome}, {atendente}, {data}, {hora}" required />
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Mensagem</label>
+                  <textarea value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} className="input-premium w-full" rows={6} placeholder="Use {nome}, {atendente}, {data}, {hora}" required />
+                  <p className="text-xs text-gray-500 mt-2">Variáveis disponíveis: {'{nome}'}, {'{atendente}'}, {'{data}'}, {'{hora}'}</p>
                 </div>
-                <div className="mb-4 flex items-center">
-                  <input type="checkbox" checked={formData.isGlobal} onChange={e => setFormData({...formData, isGlobal: e.target.checked})} className="mr-2" />
-                  <label className="text-sm">Disponível para todos os usuários</label>
+                <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-xl border border-gray-700/50">
+                  <input type="checkbox" checked={formData.isGlobal} onChange={e => setFormData({...formData, isGlobal: e.target.checked})} className="w-4 h-4 rounded accent-green-500" />
+                  <label className="text-sm text-gray-300">Disponível para todos os usuários</label>
                 </div>
-                <div className="flex gap-2">
-                  <button type="submit" className="flex-1 bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Salvar</button>
-                  <button type="button" onClick={() => { setShowModal(false); setEditing(null); }} className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400">Cancelar</button>
+                <div className="flex gap-3 pt-4">
+                  <button type="submit" className="btn-whatsapp flex-1">Salvar</button>
+                  <button type="button" onClick={() => { setShowModal(false); setEditing(null); }} className="btn-secondary flex-1">Cancelar</button>
                 </div>
               </form>
             </div>
