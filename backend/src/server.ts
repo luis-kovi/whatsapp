@@ -15,6 +15,7 @@ import whatsappRoutes from './routes/whatsapp.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import settingRoutes from './routes/setting.routes';
 import debugRoutes from './routes/debug.routes';
+import reportRoutes from './routes/report.routes';
 import { initializeSocket } from './services/socket.service';
 import { errorHandler } from './middlewares/error.middleware';
 
@@ -49,6 +50,7 @@ app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.use(errorHandler);
 

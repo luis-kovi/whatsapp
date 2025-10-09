@@ -1,4 +1,4 @@
-import { Home, MessageSquare, Users, Tag, Settings, LogOut, Smartphone } from 'lucide-react';
+import { Home, MessageSquare, Users, Tag, Settings, LogOut, Smartphone, Zap, BarChart3 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 
 export default function Sidebar() {
@@ -26,9 +26,17 @@ export default function Sidebar() {
           <Tag className="w-5 h-5" />
           <span>Tags</span>
         </a>
+        <a href="/quick-replies" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition">
+          <Zap className="w-5 h-5" />
+          <span>Respostas Rápidas</span>
+        </a>
         <a href="/whatsapp" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition">
           <Smartphone className="w-5 h-5" />
           <span>WhatsApp</span>
+        </a>
+        <a href="/reports" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition">
+          <BarChart3 className="w-5 h-5" />
+          <span>Relatórios</span>
         </a>
         <a href="/settings" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition">
           <Settings className="w-5 h-5" />

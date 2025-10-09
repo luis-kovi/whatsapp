@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Filter, MessageSquare, Clock, CheckCircle, Send, Paperclip, Tag as TagIcon, UserPlus, X } from 'lucide-react';
+import { Search, Filter, MessageSquare, Clock, CheckCircle, Send, Paperclip, Tag as TagIcon, UserPlus, X, Zap } from 'lucide-react';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 
@@ -30,9 +30,12 @@ export default function TicketsPage() {
   const [messageText, setMessageText] = useState('');
   const [filter, setFilter] = useState<'all' | 'PENDING' | 'OPEN' | 'CLOSED'>('all');
   const [search, setSearch] = useState('');
+  const [quickReplies, setQuickReplies] = useState<any[]>([]);
+  const [showQuickReplies, setShowQuickReplies] = useState(false);
 
   useEffect(() => {
     loadTickets();
+    loadQuickReplies();
     
     const socket = require('@/lib/socket').getSocket();
     if (socket) {
@@ -68,6 +71,16 @@ export default function TicketsPage() {
   const loadMessages = async (ticketId: string) => {
     const { data } = await api.get(`/tickets/${ticketId}/messages`);
     setMessages(data);
+  };
+
+  const loadQuickReplies = async () => {
+    const { data } = await api.get('/quick-replies');
+    setQuickReplies(data);
+  };
+
+  const useQuickReply = (message: string) => {
+    setMessageText(message);
+    setShowQuickReplies(false);
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -167,10 +180,23 @@ export default function TicketsPage() {
                   </div>
                 ))}
               </div>
-              <form onSubmit={handleSendMessage} className="bg-white border-t p-4 flex gap-2">
-                <button type="button" className="p-2 hover:bg-gray-100 rounded"><Paperclip size={20} /></button>
-                <input type="text" value={messageText} onChange={e => setMessageText(e.target.value)} placeholder="Digite sua mensagem..." className="flex-1 border rounded-lg px-4 py-2" />
-                <button type="submit" className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600"><Send size={20} /></button>
+              <form onSubmit={handleSendMessage} className="bg-white border-t p-4">
+                {showQuickReplies && (
+                  <div className="mb-2 max-h-40 overflow-y-auto border rounded-lg">
+                    {quickReplies.filter(r => r.shortcut.includes(messageText.replace('/', ''))).slice(0, 5).map(r => (
+                      <button key={r.id} type="button" onClick={() => useQuickReply(r.message)} className="w-full text-left px-3 py-2 hover:bg-gray-100 border-b">
+                        <span className="font-mono text-blue-600">/{r.shortcut}</span>
+                        <p className="text-sm text-gray-600 truncate">{r.message}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button type="button" className="p-2 hover:bg-gray-100 rounded"><Paperclip size={20} /></button>
+                  <button type="button" onClick={() => setShowQuickReplies(!showQuickReplies)} className="p-2 hover:bg-gray-100 rounded" title="Respostas Rápidas"><Zap size={20} /></button>
+                  <input type="text" value={messageText} onChange={e => { setMessageText(e.target.value); if(e.target.value.startsWith('/')) setShowQuickReplies(true); }} placeholder="Digite / para respostas rápidas..." className="flex-1 border rounded-lg px-4 py-2" />
+                  <button type="submit" className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600"><Send size={20} /></button>
+                </div>
               </form>
             </>
           ) : (
