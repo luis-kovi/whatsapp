@@ -58,9 +58,13 @@ function TicketsContent() {
     if (!socket) return;
 
     const handleNewMessage = (data: any) => {
+      console.log('📨 Mensagem recebida:', data);
       if (selectedTicket && data.ticketId === selectedTicket.id) {
-        setMessages(prev => [...prev, data.message]);
-        scrollToBottom();
+        const message = data.message || data;
+        if (message && typeof message.fromMe !== 'undefined') {
+          setMessages(prev => [...prev, message]);
+          scrollToBottom();
+        }
       }
       loadTickets();
     };

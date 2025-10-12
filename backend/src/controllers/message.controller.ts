@@ -37,7 +37,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       data: { lastMessageAt: new Date() }
     });
 
-    emitToAll('message:new', message);
+    emitToAll('message:new', { ticketId, message });
 
     res.status(201).json(message);
   } catch (error) {
