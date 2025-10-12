@@ -72,8 +72,10 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 No Railway, vá em **Settings**:
 
 - **Root Directory**: `backend`
-- **Build Command**: `npm install && npx prisma generate && npm run build`
+- **Build Command**: (deixe vazio - usa padrão)
 - **Start Command**: `npm start`
+
+**Nota**: O Railway detectará automaticamente o projeto Node.js e executará `npm install` e `npm run build`.
 
 ### 2.4 Obter URL do Backend
 
