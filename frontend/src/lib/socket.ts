@@ -5,7 +5,13 @@ let socket: Socket | null = null;
 export const initSocket = (token: string) => {
   if (socket) return socket;
 
-  socket = io(process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001', {
+  const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 
+                process.env.NEXT_PUBLIC_API_URL?.replace('/api', '').replace('https://', 'wss://').replace('http://', 'ws://') || 
+                'http://localhost:3001';
+  
+  console.log('🔗 Conectando WebSocket em:', wsUrl);
+  
+  socket = io(wsUrl, {
     auth: { token }
   });
 
