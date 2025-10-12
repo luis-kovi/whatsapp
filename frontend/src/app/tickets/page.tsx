@@ -18,6 +18,8 @@ interface Ticket {
 interface Message {
   id: string;
   body: string;
+  mediaUrl?: string;
+  mediaType?: string;
   fromMe: boolean;
   timestamp: string;
   user?: { name: string };
@@ -32,6 +34,7 @@ export default function TicketsPage() {
   const [search, setSearch] = useState('');
   const [quickReplies, setQuickReplies] = useState<any[]>([]);
   const [showQuickReplies, setShowQuickReplies] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     loadTickets();
@@ -43,7 +46,7 @@ export default function TicketsPage() {
       socket.on('ticket:update', loadTickets);
       socket.on('message:new', (data: any) => {
         if (selectedTicket && data.ticketId === selectedTicket.id) {
-          loadMessages(selectedTicket.id);
+          setMessages(prev => [...prev, data.message]);
         }
         loadTickets();
       });
@@ -81,6 +84,35 @@ export default function TicketsPage() {
   const useQuickReply = (message: string) => {
     setMessageText(message);
     setShowQuickReplies(false);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedTicket) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const { data } = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      await api.post('/messages', {
+        ticketId: selectedTicket.id,
+        body: messageText || file.name,
+        mediaUrl: data.url,
+        mediaType: data.mediaType
+      });
+
+      setMessageText('');
+      loadMessages(selectedTicket.id);
+    } catch (error) {
+      alert('Erro ao enviar arquivo');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -172,6 +204,14 @@ export default function TicketsPage() {
                   <div key={msg.id} className={`mb-3 flex ${msg.fromMe ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-md px-4 py-2 rounded-lg ${msg.fromMe ? 'bg-blue-500 text-white' : 'bg-white'}`}>
                       {!msg.fromMe && msg.user && <div className="text-xs opacity-75 mb-1">{msg.user.name}</div>}
+                      {msg.mediaUrl && (
+                        <div className="mb-2">
+                          {msg.mediaType === 'image' && <img src={msg.mediaUrl} alt="Imagem" className="max-w-full rounded" />}
+                          {msg.mediaType === 'video' && <video src={msg.mediaUrl} controls className="max-w-full rounded" />}
+                          {msg.mediaType === 'audio' && <audio src={msg.mediaUrl} controls className="w-full" />}
+                          {msg.mediaType === 'document' && <a href={msg.mediaUrl} target="_blank" className="text-blue-300 underline">📄 Documento</a>}
+                        </div>
+                      )}
                       <div>{msg.body}</div>
                       <div className={`text-xs mt-1 ${msg.fromMe ? 'text-blue-100' : 'text-gray-500'}`}>
                         {new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
@@ -192,7 +232,10 @@ export default function TicketsPage() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <button type="button" className="p-2 hover:bg-gray-100 rounded"><Paperclip size={20} /></button>
+                  <label className="p-2 hover:bg-gray-100 rounded cursor-pointer" title="Anexar arquivo">
+                    <Paperclip size={20} />
+                    <input type="file" onChange={handleFileUpload} className="hidden" accept="image/*,video/*,audio/*,.pdf,.doc,.docx" disabled={uploading} />
+                  </label>
                   <button type="button" onClick={() => setShowQuickReplies(!showQuickReplies)} className="p-2 hover:bg-gray-100 rounded" title="Respostas Rápidas"><Zap size={20} /></button>
                   <input type="text" value={messageText} onChange={e => { setMessageText(e.target.value); if(e.target.value.startsWith('/')) setShowQuickReplies(true); }} placeholder="Digite / para respostas rápidas..." className="flex-1 border rounded-lg px-4 py-2" />
                   <button type="submit" className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600"><Send size={20} /></button>

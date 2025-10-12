@@ -16,6 +16,7 @@ import dashboardRoutes from './routes/dashboard.routes';
 import settingRoutes from './routes/setting.routes';
 import debugRoutes from './routes/debug.routes';
 import reportRoutes from './routes/report.routes';
+import uploadRoutes from './routes/upload.routes';
 import { initializeSocket } from './services/socket.service';
 import { initializeActiveConnections } from './services/whatsapp-manager.service';
 import { errorHandler } from './middlewares/error.middleware';
@@ -34,6 +35,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 
 initializeSocket(io);
 
@@ -54,6 +56,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/upload', uploadRoutes);
 
 app.use(errorHandler);
 

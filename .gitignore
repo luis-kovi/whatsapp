@@ -13,3 +13,4 @@ coverage/
 .cache/
 postgres_data/
 auth_sessions/
+uploads/

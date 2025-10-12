@@ -130,13 +130,34 @@ export const initWhatsAppSession = async (connectionId: string) => {
 
         const messageText = msg.message.conversation || 
                            msg.message.extendedTextMessage?.text || 
-                           msg.message.imageMessage?.caption || '';
+                           msg.message.imageMessage?.caption || 
+                           msg.message.videoMessage?.caption || 
+                           msg.message.documentMessage?.caption || '';
+
+        let mediaUrl = '';
+        let mediaType = '';
+
+        if (msg.message.imageMessage) {
+          mediaType = 'image';
+          mediaUrl = msg.message.imageMessage.url || '';
+        } else if (msg.message.videoMessage) {
+          mediaType = 'video';
+          mediaUrl = msg.message.videoMessage.url || '';
+        } else if (msg.message.audioMessage) {
+          mediaType = 'audio';
+          mediaUrl = msg.message.audioMessage.url || '';
+        } else if (msg.message.documentMessage) {
+          mediaType = 'document';
+          mediaUrl = msg.message.documentMessage.url || '';
+        }
 
         const message = await prisma.message.create({
           data: {
             ticketId: ticket.id,
             connectionId,
-            body: messageText,
+            body: messageText || `[${mediaType}]`,
+            mediaUrl,
+            mediaType,
             fromMe: false,
             status: 'RECEIVED',
             timestamp: new Date(msg.messageTimestamp as number * 1000)
@@ -162,14 +183,27 @@ export const initWhatsAppSession = async (connectionId: string) => {
   }
 };
 
-export const sendWhatsAppMessage = async (connectionId: string, phoneNumber: string, message: string) => {
+export const sendWhatsAppMessage = async (connectionId: string, phoneNumber: string, message: string, mediaUrl?: string, mediaType?: string) => {
   const session = sessions.get(connectionId);
   if (!session?.socket || session.status !== 'CONNECTED') {
     throw new Error('WhatsApp not connected');
   }
 
   const jid = `${phoneNumber}@s.whatsapp.net`;
-  await session.socket.sendMessage(jid, { text: message });
+  
+  if (mediaUrl && mediaType) {
+    if (mediaType === 'image') {
+      await session.socket.sendMessage(jid, { image: { url: mediaUrl }, caption: message });
+    } else if (mediaType === 'video') {
+      await session.socket.sendMessage(jid, { video: { url: mediaUrl }, caption: message });
+    } else if (mediaType === 'audio') {
+      await session.socket.sendMessage(jid, { audio: { url: mediaUrl }, mimetype: 'audio/mp4' });
+    } else if (mediaType === 'document') {
+      await session.socket.sendMessage(jid, { document: { url: mediaUrl }, caption: message });
+    }
+  } else {
+    await session.socket.sendMessage(jid, { text: message });
+  }
 };
 
 export const disconnectWhatsApp = async (connectionId: string) => {

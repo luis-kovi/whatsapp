@@ -17,7 +17,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Ticket não encontrado' });
     }
 
-    await sendWhatsAppMessage(ticket.connectionId, ticket.contact.phoneNumber, body);
+    await sendWhatsAppMessage(ticket.connectionId, ticket.contact.phoneNumber, body, mediaUrl, mediaType);
 
     const message = await prisma.message.create({
       data: {
