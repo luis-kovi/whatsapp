@@ -10,11 +10,15 @@ export const initSocket = (token: string) => {
   });
 
   socket.on('connect', () => {
-    console.log('✅ Socket conectado');
+    console.log('✅ Socket conectado - ID:', socket.id);
   });
 
   socket.on('disconnect', () => {
     console.log('❌ Socket desconectado');
+  });
+
+  socket.on('connect_error', (error) => {
+    console.error('❌ Erro de conexão Socket:', error);
   });
 
   return socket;

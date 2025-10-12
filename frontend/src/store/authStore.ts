@@ -16,11 +16,12 @@ interface AuthStore {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   setUser: (user: User) => void;
+  initialize: () => void;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
-  token: null,
+  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
   login: async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', data.token);
@@ -33,5 +34,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({ user: null, token: null });
   },
   setUser: (user) => set({ user }),
+  initialize: () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      set({ token });
+      initSocket(token);
+    }
+  },
 }));
 
