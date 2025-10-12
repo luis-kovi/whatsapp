@@ -10,7 +10,7 @@ export const initSocket = (token: string) => {
   });
 
   socket.on('connect', () => {
-    console.log('✅ Socket conectado - ID:', socket.id);
+    console.log('✅ Socket conectado - ID:', socket?.id);
   });
 
   socket.on('disconnect', () => {
