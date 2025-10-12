@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, Filter, MessageSquare, Clock, CheckCircle, Send, Paperclip, Tag as TagIcon, UserPlus, X, Zap } from 'lucide-react';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
@@ -26,6 +27,7 @@ interface Message {
 }
 
 export default function TicketsPage() {
+  const router = useRouter();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -168,7 +170,7 @@ export default function TicketsPage() {
           </div>
           <div className="flex-1 overflow-y-auto">
             {filteredTickets.map(ticket => (
-              <div key={ticket.id} onClick={() => setSelectedTicket(ticket)} className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${selectedTicket?.id === ticket.id ? 'bg-blue-50' : ''}`}>
+              <div key={ticket.id} onClick={() => router.push(`/tickets/${ticket.id}`)} className="p-4 border-b cursor-pointer hover:bg-gray-50">
                 <div className="flex justify-between items-start mb-1">
                   <span className="font-semibold">{ticket.contact.name}</span>
                   {ticket.unreadMessages > 0 && <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">{ticket.unreadMessages}</span>}
