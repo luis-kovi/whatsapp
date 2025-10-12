@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Phone, MoreVertical, Send, Paperclip, Smile, Mic, Check, CheckCheck, Reply, Heart, X, User, Clock } from 'lucide-react';
 import api from '@/lib/api';
@@ -30,7 +30,7 @@ interface Message {
   quotedMessageId?: string;
 }
 
-export default function TicketsPage() {
+function TicketsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -455,5 +455,13 @@ export default function TicketsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function TicketsPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Carregando...</div>}>
+      <TicketsContent />
+    </Suspense>
   );
 }
