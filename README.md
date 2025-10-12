@@ -42,6 +42,24 @@ Sistema completo de gestão de atendimentos via WhatsApp com distribuição inte
 - [ ] Automações
 - [ ] Upload de mídias
 
+## 📚 Documentação Completa
+
+### 🚀 Início Rápido
+- **[START_HERE.md](START_HERE.md)** - Comece por aqui!
+- **[SUMMARY.md](SUMMARY.md)** - Resumo das alterações v2.0
+
+### 📱 WhatsApp
+- **[WHATSAPP_REAL_INTEGRATION.md](WHATSAPP_REAL_INTEGRATION.md)** - Integração WhatsApp Real
+
+### 🚂 Deploy
+- **[RAILWAY_SETUP.md](RAILWAY_SETUP.md)** - Deploy no Railway
+- **[DEPLOY_CHECKLIST.md](DEPLOY_CHECKLIST.md)** - Checklist de Deploy
+
+### 📖 Referência
+- **[CHANGELOG.md](CHANGELOG.md)** - Histórico de Alterações
+- **[RELEASE_NOTES.md](RELEASE_NOTES.md)** - Notas da Versão 2.0
+- **[DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md)** - Plano de Desenvolvimento
+
 ## 🛠️ Instalação
 
 ### Pré-requisitos
