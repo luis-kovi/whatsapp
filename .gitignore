@@ -12,3 +12,4 @@ coverage/
 *.swo
 .cache/
 postgres_data/
+auth_sessions/

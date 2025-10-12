@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { prisma } from '../utils/prisma';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { emitToAll } from '../services/socket.service';
-import { sendWhatsAppMessage } from '../services/whatsapp-mock.service';
+import { sendWhatsAppMessage } from '../services/whatsapp.service';
 
 export const sendMessage = async (req: AuthRequest, res: Response) => {
   try {

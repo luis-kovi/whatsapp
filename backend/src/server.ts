@@ -17,6 +17,7 @@ import settingRoutes from './routes/setting.routes';
 import debugRoutes from './routes/debug.routes';
 import reportRoutes from './routes/report.routes';
 import { initializeSocket } from './services/socket.service';
+import { initializeActiveConnections } from './services/whatsapp-manager.service';
 import { errorHandler } from './middlewares/error.middleware';
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.use(express.urlencoded({ extended: true }));
 initializeSocket(io);
 
 app.get('/', (req, res) => res.json({ status: 'ok', message: 'WhatsApp Manager API' }));
+app.get('/health', (req, res) => res.json({ status: 'healthy', timestamp: new Date().toISOString() }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -57,6 +59,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  await initializeActiveConnections();
 });

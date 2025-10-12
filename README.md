@@ -35,7 +35,7 @@ Sistema completo de gestão de atendimentos via WhatsApp com distribuição inte
 - [x] Notificações em tempo real (Socket.io)
 
 ### 🔄 Fase 2 - Em Desenvolvimento
-- [ ] Integração WhatsApp via Baileys (QR Code)
+- [x] Integração WhatsApp via Baileys (QR Code) ✅
 - [ ] Chatbot com fluxos configuráveis
 - [ ] Relatórios avançados
 - [ ] Pesquisa de satisfação

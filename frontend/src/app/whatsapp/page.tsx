@@ -169,7 +169,7 @@ export default function WhatsAppPage() {
               <h2 className="text-xl font-bold mb-4">Escaneie o QR Code</h2>
               <p className="text-gray-600 mb-4">Abra o WhatsApp no seu celular e escaneie o código</p>
               <div className="bg-white p-4 rounded-lg inline-block">
-                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(selectedConnection.qrCode)}`} alt="QR Code" className="w-64 h-64" />
+                <img src={selectedConnection.qrCode} alt="QR Code" className="w-64 h-64" />
               </div>
               <button onClick={() => setShowQRModal(false)} className="mt-4 bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400">Fechar</button>
             </div>
