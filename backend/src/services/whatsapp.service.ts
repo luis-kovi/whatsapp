@@ -172,6 +172,7 @@ export const initWhatsAppSession = async (connectionId: string) => {
           }
         });
 
+        console.log('📨 Emitting message:new', { ticketId: ticket.id, messageId: message.id });
         emitToAll('message:new', { ticketId: ticket.id, message });
       }
     });

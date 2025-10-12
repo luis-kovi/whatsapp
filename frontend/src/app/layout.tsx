@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import SocketProvider from '@/components/SocketProvider'
 
 export const metadata: Metadata = {
   title: 'WhatsApp Manager',
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <SocketProvider>{children}</SocketProvider>
+      </body>
     </html>
   )
 }

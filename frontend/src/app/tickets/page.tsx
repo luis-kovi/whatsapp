@@ -39,25 +39,31 @@ export default function TicketsPage() {
   useEffect(() => {
     loadTickets();
     loadQuickReplies();
-    
-    const socket = require('@/lib/socket').getSocket();
-    if (socket) {
-      socket.on('ticket:new', loadTickets);
-      socket.on('ticket:update', loadTickets);
-      socket.on('message:new', (data: any) => {
-        if (selectedTicket && data.ticketId === selectedTicket.id) {
-          setMessages(prev => [...prev, data.message]);
-        }
-        loadTickets();
-      });
-      
-      return () => {
-        socket.off('ticket:new');
-        socket.off('ticket:update');
-        socket.off('message:new');
-      };
-    }
   }, [filter]);
+
+  useEffect(() => {
+    const socket = require('@/lib/socket').getSocket();
+    if (!socket) return;
+
+    const handleNewTicket = () => loadTickets();
+    const handleUpdateTicket = () => loadTickets();
+    const handleNewMessage = (data: any) => {
+      if (selectedTicket && data.ticketId === selectedTicket.id) {
+        setMessages(prev => [...prev, data.message]);
+      }
+      loadTickets();
+    };
+
+    socket.on('ticket:new', handleNewTicket);
+    socket.on('ticket:update', handleUpdateTicket);
+    socket.on('message:new', handleNewMessage);
+
+    return () => {
+      socket.off('ticket:new', handleNewTicket);
+      socket.off('ticket:update', handleUpdateTicket);
+      socket.off('message:new', handleNewMessage);
+    };
+  }, [selectedTicket]);
 
   useEffect(() => {
     if (selectedTicket) {
