@@ -52,7 +52,9 @@ export default function TicketDetailPage() {
     };
 
     socket.on('message:new', handleNewMessage);
-    return () => socket.off('message:new', handleNewMessage);
+    return () => {
+      socket.off('message:new', handleNewMessage);
+    };
   }, [ticketId]);
 
   const loadTicket = async () => {
