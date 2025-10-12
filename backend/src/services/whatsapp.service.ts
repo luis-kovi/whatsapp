@@ -199,7 +199,7 @@ export const sendWhatsAppMessage = async (connectionId: string, phoneNumber: str
     } else if (mediaType === 'audio') {
       await session.socket.sendMessage(jid, { audio: { url: mediaUrl }, mimetype: 'audio/mp4' });
     } else if (mediaType === 'document') {
-      await session.socket.sendMessage(jid, { document: { url: mediaUrl }, caption: message });
+      await session.socket.sendMessage(jid, { document: { url: mediaUrl }, mimetype: 'application/pdf', caption: message });
     }
   } else {
     await session.socket.sendMessage(jid, { text: message });
