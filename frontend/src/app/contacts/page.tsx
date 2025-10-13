@@ -21,10 +21,15 @@ export default function ContactsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [formData, setFormData] = useState({ name: '', phone: '', email: '' });
+  const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [tags, setTags] = useState<any[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { user } = useAuthStore();
 
   useEffect(() => {
     fetchContacts();
+    fetchTags();
   }, []);
 
   const fetchContacts = async () => {
@@ -35,6 +40,15 @@ export default function ContactsPage() {
       console.error('Erro ao buscar contatos:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTags = async () => {
+    try {
+      const response = await api.get('/tags');
+      setTags(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar tags:', error);
     }
   };
 
@@ -66,13 +80,19 @@ export default function ContactsPage() {
     }
   };
 
-  const createTicket = async (phoneNumber: string) => {
+  const createTicket = async () => {
+    if (!selectedContact) return;
+    
     try {
       await api.post('/tickets', {
-        contactPhone: phoneNumber,
-        contactName: contacts.find(c => c.phoneNumber === phoneNumber)?.name || 'Contato'
+        contactPhone: selectedContact.phoneNumber,
+        contactName: selectedContact.name,
+        tags: selectedTags
       });
       
+      setShowCreateTicketModal(false);
+      setSelectedContact(null);
+      setSelectedTags([]);
       alert('Ticket criado com sucesso!');
     } catch (error) {
       console.error('Erro ao criar ticket:', error);
@@ -136,7 +156,10 @@ export default function ContactsPage() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => createTicket(contact.phoneNumber)}
+                      onClick={() => {
+                        setSelectedContact(contact);
+                        setShowCreateTicketModal(true);
+                      }}
                       className="text-green-600 hover:text-green-800"
                       title="Criar Ticket"
                     >
@@ -235,6 +258,69 @@ export default function ContactsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Criar Ticket */}
+      {showCreateTicketModal && selectedContact && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Criar Ticket de Atendimento</h2>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Contato</label>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="font-medium">{selectedContact.name}</p>
+                <p className="text-sm text-gray-600">{selectedContact.phoneNumber}</p>
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2">Tags (selecione pelo menos uma)</label>
+              <div className="space-y-2 max-h-32 overflow-y-auto border rounded-lg p-3">
+                {tags.length > 0 ? tags.map(tag => (
+                  <label key={tag.id} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedTags.includes(tag.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTags(prev => [...prev, tag.id]);
+                        } else {
+                          setSelectedTags(prev => prev.filter(t => t !== tag.id));
+                        }
+                      }}
+                      className="mr-2"
+                    />
+                    <span className="text-sm">{tag.name}</span>
+                  </label>
+                )) : (
+                  <p className="text-sm text-gray-500">Nenhuma tag disponível</p>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowCreateTicketModal(false);
+                  setSelectedContact(null);
+                  setSelectedTags([]);
+                }}
+                className="px-4 py-2 text-gray-600 border rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={createTicket}
+                disabled={selectedTags.length === 0}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <MessageCircle size={18} />
+                Criar Ticket
+              </button>
+            </div>
           </div>
         </div>
       )}
