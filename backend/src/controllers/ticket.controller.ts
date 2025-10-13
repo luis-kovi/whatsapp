@@ -7,6 +7,11 @@ export const createTicket = async (req: AuthRequest, res: Response) => {
   try {
     const { contactPhone, contactName, tags } = req.body;
 
+    const connection = await prisma.whatsAppConnection.findFirst({ where: { isDefault: true } });
+    if (!connection) {
+      return res.status(400).json({ error: 'Nenhuma conexão WhatsApp configurada' });
+    }
+
     let contact = await prisma.contact.findUnique({ where: { phoneNumber: contactPhone } });
     
     if (!contact) {
@@ -18,6 +23,7 @@ export const createTicket = async (req: AuthRequest, res: Response) => {
     const ticket = await prisma.ticket.create({
       data: {
         contactId: contact.id,
+        connectionId: connection.id,
         status: 'PENDING',
         lastMessageAt: new Date()
       },
