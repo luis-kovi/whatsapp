@@ -187,19 +187,11 @@ function TicketsContent() {
     e.preventDefault();
     try {
       const phone = newTicketData.contactId ? 
-        contacts.find(c => c.id === newTicketData.contactId)?.phone : 
+        contacts.find(c => c.id === newTicketData.contactId)?.phoneNumber : 
         newTicketData.phone;
       
       if (!phone) {
         alert('Telefone é obrigatório');
-        return;
-      }
-
-      // Verificar se já existe ticket aberto/pendente para este telefone
-      const existingTickets = await api.get(`/tickets?phone=${phone}&status=OPEN,PENDING`);
-      
-      if (existingTickets.data.length > 0) {
-        alert('Já existe um ticket de atendimento aberto ou pendente para este telefone.');
         return;
       }
 
@@ -535,7 +527,7 @@ function TicketsContent() {
                   <option value="">Selecione um contato ou digite manualmente</option>
                   {contacts.map(contact => (
                     <option key={contact.id} value={contact.id}>
-                      {contact.name} - {contact.phone}
+                      {contact.name} - {contact.phoneNumber}
                     </option>
                   ))}
                 </select>
