@@ -272,9 +272,13 @@ function TicketsContent() {
               className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition ${selectedTicket?.id === ticket.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
             >
               <div className="flex gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                  {ticket.contact.name[0].toUpperCase()}
-                </div>
+                {ticket.contact.avatar ? (
+                  <img src={ticket.contact.avatar} alt={ticket.contact.name} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                    {ticket.contact.name[0].toUpperCase()}
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-semibold text-gray-900 truncate">{ticket.contact.name}</span>
@@ -303,9 +307,13 @@ function TicketsContent() {
           {/* Header do Chat */}
           <div className="bg-white border-b p-3 flex justify-between items-center shadow-sm">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => setShowContactInfo(!showContactInfo)}>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold">
-                {selectedTicket.contact.name[0].toUpperCase()}
-              </div>
+              {selectedTicket.contact.avatar ? (
+                <img src={selectedTicket.contact.avatar} alt={selectedTicket.contact.name} className="w-10 h-10 rounded-full object-cover" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold">
+                  {selectedTicket.contact.name[0].toUpperCase()}
+                </div>
+              )}
               <div>
                 <h3 className="font-semibold text-gray-900">{selectedTicket.contact.name}</h3>
                 <p className="text-xs text-gray-500">
@@ -469,9 +477,13 @@ function TicketsContent() {
           </div>
 
           <div className="text-center mb-6">
-            <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-5xl mb-4">
-              {selectedTicket.contact.name[0].toUpperCase()}
-            </div>
+            {selectedTicket.contact.avatar ? (
+              <img src={selectedTicket.contact.avatar} alt={selectedTicket.contact.name} className="w-32 h-32 mx-auto rounded-full object-cover mb-4" />
+            ) : (
+              <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-5xl mb-4">
+                {selectedTicket.contact.name[0].toUpperCase()}
+              </div>
+            )}
             <h4 className="text-xl font-semibold mb-1">{selectedTicket.contact.name}</h4>
             <p className="text-gray-600">{selectedTicket.contact.phoneNumber}</p>
           </div>
