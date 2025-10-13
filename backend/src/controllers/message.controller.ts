@@ -17,7 +17,11 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Ticket não encontrado' });
     }
 
-    await sendWhatsAppMessage(ticket.connectionId, ticket.contact.phoneNumber, body, mediaUrl, mediaType);
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+    const firstName = user?.name.split(' ')[0] || 'Atendente';
+    const formattedMessage = `*${firstName} - Kovi:*\n\n${body}`;
+
+    await sendWhatsAppMessage(ticket.connectionId, ticket.contact.phoneNumber, formattedMessage, mediaUrl, mediaType);
 
     const message = await prisma.message.create({
       data: {
