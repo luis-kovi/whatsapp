@@ -76,8 +76,7 @@ export default function ContactsPage() {
       }
 
       await api.post('/tickets', {
-        contactPhone: phone,
-        queueId: user?.queueIds?.[0] || null
+        contactPhone: phone
       });
       
       alert('Ticket criado com sucesso!');
