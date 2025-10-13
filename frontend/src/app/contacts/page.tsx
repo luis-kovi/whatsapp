@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2 } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+import Sidebar from '@/components/Sidebar';
 
 interface Contact {
   id: string;
   name: string;
-  phone: string;
+  phoneNumber: string;
   email?: string;
   createdAt: string;
 }
@@ -65,18 +66,11 @@ export default function ContactsPage() {
     }
   };
 
-  const createTicket = async (phone: string) => {
+  const createTicket = async (phoneNumber: string) => {
     try {
-      // Verificar se já existe ticket aberto/pendente para este telefone
-      const existingTickets = await api.get(`/tickets?phone=${phone}&status=open,pending`);
-      
-      if (existingTickets.data.length > 0) {
-        alert('Já existe um ticket de atendimento aberto ou pendente para este telefone.');
-        return;
-      }
-
       await api.post('/tickets', {
-        contactPhone: phone
+        contactPhone: phoneNumber,
+        contactName: contacts.find(c => c.phoneNumber === phoneNumber)?.name || 'Contato'
       });
       
       alert('Ticket criado com sucesso!');
@@ -88,7 +82,7 @@ export default function ContactsPage() {
 
   const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.phone.includes(searchTerm)
+    contact.phoneNumber.includes(searchTerm)
   );
 
   if (loading) {
@@ -96,7 +90,9 @@ export default function ContactsPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar />
+      <div className="flex-1 p-6 bg-gray-50">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Contatos</h1>
         <button
@@ -135,12 +131,12 @@ export default function ContactsPage() {
             {filteredContacts.map((contact) => (
               <tr key={contact.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap font-medium">{contact.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-600">{contact.phone}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-600">{contact.phoneNumber}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-gray-600">{contact.email || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => createTicket(contact.phone)}
+                      onClick={() => createTicket(contact.phoneNumber)}
                       className="text-green-600 hover:text-green-800"
                       title="Criar Ticket"
                     >
@@ -149,7 +145,7 @@ export default function ContactsPage() {
                     <button
                       onClick={() => {
                         setEditingContact(contact);
-                        setFormData({ name: contact.name, phone: contact.phone, email: contact.email || '' });
+                        setFormData({ name: contact.name, phone: contact.phoneNumber, email: contact.email || '' });
                         setShowCreateModal(true);
                       }}
                       className="text-blue-600 hover:text-blue-800"
@@ -242,6 +238,7 @@ export default function ContactsPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
