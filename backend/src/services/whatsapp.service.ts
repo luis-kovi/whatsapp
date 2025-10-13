@@ -1,4 +1,4 @@
-import makeWASocket, { DisconnectReason, useMultiFileAuthState, WASocket } from '@whiskeysockets/baileys';
+import makeWASocket, { DisconnectReason, useMultiFileAuthState, WASocket, getAggregateVotesInPollMessage } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import qrcode from 'qrcode';
 import { prisma } from '../utils/prisma';
@@ -99,12 +99,34 @@ export const initWhatsAppSession = async (connectionId: string) => {
 
         let contact = await prisma.contact.findUnique({ where: { phoneNumber } });
         if (!contact) {
+          let avatar = '';
+          try {
+            const profilePic = await sock.profilePictureUrl(msg.key.remoteJid!, 'image');
+            avatar = profilePic || '';
+          } catch (e) {
+            console.log('No profile picture available');
+          }
+
           contact = await prisma.contact.create({
             data: {
               name: msg.pushName || phoneNumber,
-              phoneNumber
+              phoneNumber,
+              avatar
             }
           });
+        } else if (!contact.avatar) {
+          try {
+            const profilePic = await sock.profilePictureUrl(msg.key.remoteJid!, 'image');
+            if (profilePic) {
+              await prisma.contact.update({
+                where: { id: contact.id },
+                data: { avatar: profilePic }
+              });
+              contact.avatar = profilePic;
+            }
+          } catch (e) {
+            console.log('No profile picture available');
+          }
         }
 
         let ticket = await prisma.ticket.findFirst({

@@ -27,6 +27,17 @@ export const createTicket = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    const existingTicket = await prisma.ticket.findFirst({
+      where: {
+        contactId: contact.id,
+        status: { in: ['PENDING', 'OPEN'] }
+      }
+    });
+
+    if (existingTicket) {
+      return res.status(400).json({ error: 'Já existe um ticket aberto ou pendente para este contato' });
+    }
+
     const ticket = await prisma.ticket.create({
       data: {
         contactId: contact.id,
