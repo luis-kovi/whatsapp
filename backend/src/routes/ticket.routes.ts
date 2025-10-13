@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getTickets, getTicket, acceptTicket, closeTicket, transferTicket, getTicketMessages } from '../controllers/ticket.controller';
+import { getTickets, getTicket, createTicket, acceptTicket, closeTicket, transferTicket, getTicketMessages } from '../controllers/ticket.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 
 const router = Router();
@@ -7,6 +7,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', getTickets);
+router.post('/', createTicket);
 router.get('/:id', getTicket);
 router.get('/:id/messages', getTicketMessages);
 router.put('/:id/accept', acceptTicket);

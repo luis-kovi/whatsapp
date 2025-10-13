@@ -3,6 +3,46 @@ import { prisma } from '../utils/prisma';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { emitToAll, emitToUser } from '../services/socket.service';
 
+export const createTicket = async (req: AuthRequest, res: Response) => {
+  try {
+    const { contactPhone, contactName, tags } = req.body;
+
+    let contact = await prisma.contact.findUnique({ where: { phoneNumber: contactPhone } });
+    
+    if (!contact) {
+      contact = await prisma.contact.create({
+        data: { phoneNumber: contactPhone, name: contactName || contactPhone }
+      });
+    }
+
+    const ticket = await prisma.ticket.create({
+      data: {
+        contactId: contact.id,
+        status: 'PENDING',
+        lastMessageAt: new Date()
+      },
+      include: {
+        contact: true,
+        user: { select: { id: true, name: true, avatar: true } },
+        queue: true
+      }
+    });
+
+    if (tags && tags.length > 0) {
+      await prisma.ticketTag.createMany({
+        data: tags.map((tagId: string) => ({ ticketId: ticket.id, tagId }))
+      });
+    }
+
+    emitToAll('ticket:new', ticket);
+
+    res.json(ticket);
+  } catch (error) {
+    console.error('Erro ao criar ticket:', error);
+    res.status(500).json({ error: 'Erro ao criar ticket' });
+  }
+};
+
 export const getTickets = async (req: AuthRequest, res: Response) => {
   try {
     const { status, queueId, userId } = req.query;
