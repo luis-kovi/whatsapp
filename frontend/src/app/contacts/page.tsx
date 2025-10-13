@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2 } from 'lucide-react';
-import { api } from '@/lib/api';
+import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 
 interface Contact {
