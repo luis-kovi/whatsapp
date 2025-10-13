@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, MessageSquare, Users, Tag, Settings, LogOut, Smartphone, Zap, BarChart3, Menu, X } from 'lucide-react';
+import { Home, MessageSquare, Users, Tag, Settings, LogOut, Smartphone, Zap, BarChart3, Menu, X, UserCheck } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -15,6 +15,7 @@ export default function Sidebar() {
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
     { icon: MessageSquare, label: 'Atendimentos', path: '/tickets' },
+    { icon: UserCheck, label: 'Contatos', path: '/contacts' },
     { icon: Users, label: 'Usuários', path: '/users' },
     { icon: Tag, label: 'Tags', path: '/tags' },
     { icon: Zap, label: 'Respostas', path: '/quick-replies' },

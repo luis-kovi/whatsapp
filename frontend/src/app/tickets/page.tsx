@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, Phone, MoreVertical, Send, Paperclip, Smile, Mic, Check, CheckCheck, Reply, Heart, X, User, Clock } from 'lucide-react';
+import { Search, Phone, MoreVertical, Send, Paperclip, Smile, Mic, Check, CheckCheck, Reply, Heart, X, User, Clock, Plus, MessageCircle } from 'lucide-react';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import { getSocket } from '@/lib/socket';
@@ -44,9 +44,13 @@ function TicketsContent() {
   const [uploading, setUploading] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [showContactInfo, setShowContactInfo] = useState(false);
+  const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [newTicketData, setNewTicketData] = useState({ contactId: '', phone: '', name: '' });
 
   useEffect(() => {
     loadTickets();
+    loadContacts();
     const ticketId = searchParams.get('id');
     if (ticketId) {
       loadTicketById(ticketId);
@@ -94,6 +98,15 @@ function TicketsContent() {
     const params = filter !== 'all' ? { status: filter } : {};
     const { data } = await api.get('/tickets', { params });
     setTickets(data);
+  };
+
+  const loadContacts = async () => {
+    try {
+      const { data } = await api.get('/contacts');
+      setContacts(data);
+    } catch (error) {
+      console.error('Erro ao carregar contatos:', error);
+    }
   };
 
   const loadTicketById = async (id: string) => {
@@ -170,6 +183,43 @@ function TicketsContent() {
     loadTickets();
   };
 
+  const handleCreateTicket = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const phone = newTicketData.contactId ? 
+        contacts.find(c => c.id === newTicketData.contactId)?.phone : 
+        newTicketData.phone;
+      
+      if (!phone) {
+        alert('Telefone é obrigatório');
+        return;
+      }
+
+      // Verificar se já existe ticket aberto/pendente para este telefone
+      const existingTickets = await api.get(`/tickets?phone=${phone}&status=OPEN,PENDING`);
+      
+      if (existingTickets.data.length > 0) {
+        alert('Já existe um ticket de atendimento aberto ou pendente para este telefone.');
+        return;
+      }
+
+      await api.post('/tickets', {
+        contactPhone: phone,
+        contactName: newTicketData.contactId ? 
+          contacts.find(c => c.id === newTicketData.contactId)?.name : 
+          newTicketData.name
+      });
+      
+      setShowCreateTicketModal(false);
+      setNewTicketData({ contactId: '', phone: '', name: '' });
+      loadTickets();
+      alert('Ticket criado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao criar ticket:', error);
+      alert('Erro ao criar ticket de atendimento.');
+    }
+  };
+
   const filteredTickets = tickets.filter(t => 
     t.contact.name.toLowerCase().includes(search.toLowerCase()) ||
     t.contact.phoneNumber.includes(search)
@@ -189,7 +239,16 @@ function TicketsContent() {
       {/* Lista de Tickets */}
       <div className="w-96 bg-white border-r flex flex-col">
         <div className="p-4 bg-gray-50 border-b">
-          <h2 className="text-xl font-bold mb-3">Conversas</h2>
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-xl font-bold">Conversas</h2>
+            <button
+              onClick={() => setShowCreateTicketModal(true)}
+              className="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition"
+              title="Novo Ticket"
+            >
+              <Plus size={18} />
+            </button>
+          </div>
           <div className="relative mb-3">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
             <input 
@@ -455,6 +514,81 @@ function TicketsContent() {
                 Finalizar Atendimento
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Criar Ticket */}
+      {showCreateTicketModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Novo Ticket de Atendimento</h2>
+            
+            <form onSubmit={handleCreateTicket}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Selecionar Contato</label>
+                <select
+                  value={newTicketData.contactId}
+                  onChange={(e) => setNewTicketData({ ...newTicketData, contactId: e.target.value, phone: '', name: '' })}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">Selecione um contato ou digite manualmente</option>
+                  {contacts.map(contact => (
+                    <option key={contact.id} value={contact.id}>
+                      {contact.name} - {contact.phone}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {!newTicketData.contactId && (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Nome *</label>
+                    <input
+                      type="text"
+                      required={!newTicketData.contactId}
+                      value={newTicketData.name}
+                      onChange={(e) => setNewTicketData({ ...newTicketData, name: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Nome do contato"
+                    />
+                  </div>
+                  
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-2">Telefone *</label>
+                    <input
+                      type="tel"
+                      required={!newTicketData.contactId}
+                      value={newTicketData.phone}
+                      onChange={(e) => setNewTicketData({ ...newTicketData, phone: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Número do telefone"
+                    />
+                  </div>
+                </>
+              )}
+              
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateTicketModal(false);
+                    setNewTicketData({ contactId: '', phone: '', name: '' });
+                  }}
+                  className="px-4 py-2 text-gray-600 border rounded-lg hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                >
+                  <MessageCircle size={18} />
+                  Criar Ticket
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
